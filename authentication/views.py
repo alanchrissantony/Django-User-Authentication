@@ -13,6 +13,8 @@ def home(request):
     return redirect('signin')
 
 def roothome(request):
+    if "admin" not in request.session:
+        return redirect('root')
     myUser = User.objects.all()
     if request.method == "POST":
         key = request.POST['search']
@@ -39,8 +41,7 @@ def login(request):
 
 def root(request):
     if "admin" in request.session:
-        myUser = User.objects.all()
-        return render(request,"account/admin.html",{'users':myUser})
+        return redirect("roothome")
     if request.method == "POST":
         email=request.POST['email']
         password=request.POST["pass"]
@@ -51,8 +52,7 @@ def root(request):
                 user = authenticate(username=email, password=password)
                 if user is not None:
                     request.session['admin']=str(user)
-                    myUser = User.objects.all()
-                    return render(request,"account/admin.html",{'users':myUser})
+                    return redirect("roothome")
                 else:
                     messages.success(request, "Invalid Credentials")
                     return render(request,"account/admin-login.html")
@@ -90,6 +90,8 @@ def signout(request):
     return redirect('signin')
 
 def edit(request, id):
+    if "admin" not in request.session:
+        return redirect('root')
     myUser = User.objects.get(id=id)
     if request.method == 'POST':
         username = request.POST['username']
@@ -98,11 +100,13 @@ def edit(request, id):
         myUser.email = username
         myUser.save()
         myUser = User.objects.all()
-        return render(request,"account/admin.html",{'users':myUser})
+        return redirect("roothome")
     return render(request,"account/edit.html",{'users':myUser})
 
 def delete(request, id):
+    if "admin" not in request.session:
+        return redirect('root')
     myUser = User.objects.get(id=id)
     myUser.delete()
     myUser = User.objects.all()
-    return render(request,"account/admin.html",{'users':myUser})
+    return redirect("roothome")
