@@ -12,9 +12,9 @@ def home(request):
         return render(request,"Youtube/index.html")
     return redirect('signin')
 
-def roothome(request):
+def root(request):
     if "admin" not in request.session:
-        return redirect('root')
+        return redirect('admin')
     myUser = User.objects.all()
     if request.method == "POST":
         key = request.POST['search']
@@ -39,9 +39,9 @@ def login(request):
    
         return render(request,"account/login.html")
 
-def root(request):
+def admin(request):
     if "admin" in request.session:
-        return redirect("roothome")
+        return redirect("root")
     if request.method == "POST":
         email=request.POST['email']
         password=request.POST["pass"]
@@ -52,7 +52,7 @@ def root(request):
                 user = authenticate(username=email, password=password)
                 if user is not None:
                     request.session['admin']=str(user)
-                    return redirect("roothome")
+                    return redirect("root")
                 else:
                     messages.success(request, "Invalid Credentials")
                     return render(request,"account/admin-login.html")
@@ -91,7 +91,7 @@ def signout(request):
 
 def edit(request, id):
     if "admin" not in request.session:
-        return redirect('root')
+        return redirect('admin')
     myUser = User.objects.get(id=id)
     if request.method == 'POST':
         username = request.POST['username']
@@ -100,13 +100,13 @@ def edit(request, id):
         myUser.email = username
         myUser.save()
         myUser = User.objects.all()
-        return redirect("roothome")
+        return redirect("root")
     return render(request,"account/edit.html",{'users':myUser})
 
 def delete(request, id):
     if "admin" not in request.session:
-        return redirect('root')
+        return redirect('admin')
     myUser = User.objects.get(id=id)
     myUser.delete()
     myUser = User.objects.all()
-    return redirect("roothome")
+    return redirect("root")
